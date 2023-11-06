@@ -530,7 +530,7 @@ DELIMITER $$  #changing a delimeter to something else
 create procedure get_customers()
 begin
 select * from customers;
-end $$
+end$$
 DELIMITER ; 
 
 call get_customer();
@@ -540,7 +540,7 @@ create procedure find_customer(in id int) # find customer by their id
 begin
 	select * from customers
     where customer_id = id;
-end
+end$$
 DELIMITER ;
 
 call find_customer(4); # 4 is the id
