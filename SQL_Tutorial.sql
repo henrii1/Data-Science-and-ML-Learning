@@ -15,7 +15,7 @@ create table employees (
 use mydb;
 drop database mysql;
 select * from employees;
-rename table employees to workers;
+rename table employees to workers; #works for all table types and views
 
 alter table employees
 add phone_number varchar(15);
@@ -24,7 +24,7 @@ alter table employees
 rename phone_number to email;
 
 alter table employees
-modify email varchar(100);
+modify email varchar(100); # modify multiple rows by modify email CHAR(14), modify name varchar(255);
 
 alter table employees
 modify email varchar(100)
@@ -134,7 +134,8 @@ create table employees (
     last_name varchar(50),
     hourly_pay decimal(5, 2), /*max digit is 5, decimal is 2*/
     hire_date date,
-    constraint chk_hourly_pay check(hourly_pay >= 10.00) #adding a check and gives it a name
+    constraint chk_hourly_pay check(hourly_pay >= 10.00) #adding a check, values must be above check
+    
 );
 
 alter table employees
@@ -300,6 +301,21 @@ select transaction_id, amount, first_name, last_name
 from transactions right join customers # transactions will be on the left
 on transactions.customer_id = customers.customer_id;
 
+# full outer join in sql
+
+select columns
+from table 1
+left join table 2
+on table1.comm = table2.comm
+#optional where clause
+
+union all
+
+select columns
+from table1 right join table2
+on table1.comm = table2.comm
+#optional where clauses
+
 # functions in mysql
 # count
 select count(amount) 
@@ -310,6 +326,65 @@ from transactions;
 
 select max(amount) as maximum # min, avg, sum
 from transactions;
+
+#aggregate functions
+round(colname, decimalplace) 
+mod(col/value, divide by value) # remainder
+
+#string functions
+concat('str1',' ', 'str2')
+substr('str', start_index, length) #substring
+ucase(col_name) #  these are usually at select add from and where
+lcase(col_name) # lower case
+
+select concat(name, '-', quantity) 
+from items, mg_orders 
+where item.itemID = mg_orders.itemID # merging from multiple tables
+
+#date functions
+datediff # finding the difference between two dates
+date_format() #customized
+select date_format('yyyy-mm-dd', new_format)
+select datediff ('date_1', 'date_2')
+
+#eg 
+select date_format (order_date, '%M') 
+from mg_orders; # returns the months only.
+
+select datediff(delivery_date, order_date) 
+from mg_orders
+where delivery_date is not null;
+
+# comparison functions (can be used with various data types)
+greatest()
+least()
+isnull()
+
+select col1_prim/key # col1 usually is the primary key
+greatest (col2, col3, col4) as highest,
+least(col2, col3, col4) as lowest
+from sales_revenuue;
+
+select * 
+from table_name
+where isnull(column)
+
+# control flow functions
+# case acts like an if else
+select col_name
+case
+ when condition1 then result1
+ when condition2 then result2
+else result
+end as alias #alias is not mandatory
+
+#eg
+select itemID, 
+    case
+    when least(col1,col2,col3) <= 2300 then 'loss'
+    else 'profit'
+    end as profit_loss # result column name
+    from sales_revenue_table;
 
 select * from employees;
 
@@ -424,6 +499,13 @@ create view customer_emails as
 select email 
 from customers;
 
+# for multiple tables using joins
+create view new_view as
+select tab1.col1, tab2.col3
+from tab1 inner join tab2
+on tab1.col2 = tab2.col2
+order by tab1.col1 desc limit 4; # optional depending on script use.
+
 select * from customer_emails;
 
 # indexes (BTree data structure)
@@ -431,6 +513,8 @@ select * from customer_emails;
 show indexes from customers;
 select * from customers;
 
+#we could also see the formatting for each column by;
+show columns from customers; # shows all formatting in tabular form
 
 create index last_name_idx
 on customers(last_name); # creaating an index for last name
@@ -445,6 +529,18 @@ show indexes from customers;
 alter table customers
 drop index last_name_idx;
 
+#indexes are pointers to data (primary: created whenever a primary key is created, secondary: uniquely defined)
+
+#defining secondary
+create index index_name on table_name (col_list); # list of columns that you frequently perform search
+
+# use explain to see how a code was executed
+explain select ContactNumber from clients where fullname = 'jane Delgade'
+
+#eg creating a search index
+create index IdxFullname on Clients(FullName);
+explain select ContactNumber from clients where fullname = 'jane Delgade' # this will take shorter to execute because it searches the index.
+
 
 # subqueries. query within another query
 select first_name, last_name, hourly_pay, 
@@ -454,6 +550,12 @@ from employees;
 select first_name, last_name, hourly_pay
 from employees
 where  hourly_pay > (select avg(hourly_pay) from employees);
+
+# use exists and not exists to check if something is available or not.
+# works like find
+select first_name
+from employees
+where exists (select * from employees where hourly_pay is null);
 
 select * from transactions;
 
@@ -493,7 +595,7 @@ select sum(amount), order_date
 from transactions
 group by order_date with rollup; # displays the grand total
 
-# on delete set null, on delete cascade
+# on delete set null (sets null values wherever the deleted data is referenced), on delete cascade (helps delete related data in other tables)
 select * from customers;
 delete from customers
 where customer_id = 4;
@@ -523,7 +625,7 @@ on delete set null; # adding on delete after table creation
 alter table transactions
 add constraint fk_transactions_id
 foreign key (customer_id) references customers(customer_id)
-on delete cascade;
+on delete cascade on update cascade; #on update cascade makes all update to happen wherever that data is referenced.
 
 # stored procedure (like a function)
 DELIMITER $$  #changing a delimeter to something else
@@ -542,6 +644,13 @@ begin
     where customer_id = id;
 end$$
 DELIMITER ;
+
+
+create procedure getlowestprice(lowestPrice int)
+select * 
+from products
+where Price <= LowestPrice;
+
 
 call find_customer(4); # 4 is the id
 
@@ -630,3 +739,293 @@ update employees
 set hourly_pay = 100
 where employee_id = 1;
 select * from expenses;
+
+# drop column
+alter table table_name
+drop column column_name;
+
+#triggers used to (insert, update and delete) automatically
+#droping triggers
+drop trigger if exists schema_name.trigger_name #schema_name is database_name
+
+#trigger types 1:row level (for each row), statement level (not supported in mysql)
+# use before if the value to store is different from what is entered, use after if changes will occur elsewhere.
+
+# eg: minus values assigned to zero
+delimiter $$
+create trigger OrderQtyCheck 
+before insert
+on orders
+for each row
+begin if new.Quantity < 0
+then new.Quantity = 0;
+end if;
+end $$
+
+delimiter ;
+
+#select 10 + 15 will display the answer
+# not equal to is '<>'
+
+# creating  complex functions and procedures
+
+#creating a variable
+@variable_name = value;
+
+#creating variable inside or outside a stored procedures we use the set clause
+
+set @variable_name = value;
+
+set @order_id = 3;
+select * from orders where OrderID = @order_id;
+
+#creating a variable inside a stored procedures using declare
+declare minimum_order_cost Decimal(5, 2) default 0;
+
+#assiging within a select statement using ':=' assignment operator
+select @variable_name := value; #value could be a function
+#2nd method
+select avg(cost) into @average_cost from orders; # avg(cost) := @average_cost
+
+# Parameters in sql 'in' 'out' 'inout' Parameters
+#in
+create procedure procedure_name(in logic (val1, val2)) select logic; # without adding 'in' mysql uses in by default
+call procedure_name(value);
+
+#out: used with variables defined outside the procedure
+create procdure getlowestcost (out lowestcost decimal(6, 2))
+select min(cost) into lowestcost from orders;
+call getlowestcost(@order_lowest_cost) # a variable defined outside.
+#display variable value using select
+select @order_lowest_cost;
+
+# inout Parameters returns the variable as the output
+
+create procedure squareAnumber(inout aNumber int)
+begin
+set aNumber = aNumber * aNumber;
+End
+set @x_number = 5;
+call squareAnumber (@x_number); 
+select @x_number; # returns the output of the procedure.
+
+
+#user defined functions
+create function findtotalcost(cost decimal(5,2))
+returns decimal (5, 2) deterministic
+return (cost - (cost * 0.1));
+
+select findtotalcost(100)
+
+# a function that adds 10 percent if cost is btwn 100 and 500, adds 20% if greater
+delimiter $$
+create function gettotalcost(cost Decimal(5, 2))
+returns decimal(5, 2) deterministic
+begin if (cost >= 100 and cost< 500) then set cost = cost - (cost * 0.1);
+elseif (cost >= 500) then set cost = cost -(cost * 0.2);
+end if;
+return (cost);
+end$$
+
+delimiter ;
+
+select gettotalcost(500); #result is a single column table displaying the results
+
+drop function gettotalcost; #drops the function
+
+# creating complex stored procedure
+
+delimiter $$
+create procdure getporceduresummary(out numberofLowPriceProducts int, out NumberOfHighPriceProducts int)
+begin
+select count(produtID) into numberofLowPriceProducts 
+from products where price < 50;
+select count(productID) into NumberOfHighPriceProducts
+from products
+where price <50;
+end $$
+
+delimiter ;
+
+call getporceduresummary(@TotalNumberOfLowPriceProducts, @TotalNumberOfHighPriceProducts);
+
+select @TotalNumberOfLowPriceProducts, @TotalNumberOfHighPriceProducts; #displays the two result in a table
+
+#NB: a function returns only single value but a procedure can return single or multiple values
+
+
+
+
+# mysql schedule events eg. (generating reports at a specified time and date)
+
+# two kinds: one time events, recurring events
+
+#on time
+create event [if not exists] event_name
+on schedule at current_timestamp + interval 12 hour
+do
+event_body
+
+#recurring event
+create event [if not exists] event_name
+on schedule
+every interval starts timestamp [+interval] ends timestamp [+interval]
+do
+event_body
+
+# deleting an event
+drop event [if exists] event_name; # if exists is used so that it wouldn't yeild an error if already available
+
+#examples
+delimiter $$
+create event GenerateRevenueReport 
+on schedule
+at current_timestamp + interval 12 hour
+do 
+begin insert into ReportData (OrderID, ClientID, ProductID, Quantity, Cost,Date)
+select * from orders
+where date between '2022-08-01' and '2022-08-31';
+end$$
+
+delimiter ;
+
+#scheduled events
+delimiter $$
+
+create event DailyRestock 
+on schedule
+every 1 day
+do
+begin if Products.NumberOfItems < 50
+then update Products
+set NumberOfItems = 50;
+end if;
+end$$
+
+delimiter ;
+
+# drop event
+drop event if exists DalyRestock;
+
+
+
+#database optimization
+
+# reverse full_name
+update clients
+set reversefullname = concat(substring_index(fullName, '', -1), ' ', substring_index(fullName, '', 1));
+
+
+
+
+
+# transactions (rolling back to previous states)
+start transaction; # signifies the point to roll back to
+sql_statement_1
+sql_statement_2
+sql_statement_3
+rollback;
+commit;
+
+begin; # signifies the point to roll back to
+sql_statement_1
+sql_statement_2
+sql_statement_3
+rollback;
+commit;
+
+
+# common table expressions (CTE) converting complex queries into simple blocks of code
+
+#single CTE
+with common_table_name as
+(query)
+select * from common_table_name
+
+#multiple CTE
+with 
+cte1 as (query1)
+cte2 as (query2)
+cte3 as (query3)
+select * from cte1
+union               #for adding others.
+select * from cte2
+
+#eg
+with
+average_sales_2020 as (select concat(avg(cost), '(2020)') as "average Sales" from orders
+where Year(Date) = 2020),
+average_sales_2021 as (select concat(avg(cost), '(2021)')  from orders
+where Year(Date) = 2021),
+average_sales_2022 as (select concat(avg(cost), '(2022)')  from orders
+where Year(Date) = 2022)
+select * from average_sales_2020
+union
+select * from average_sales_2021
+union 
+select * from average_sales_2022;
+
+
+#prepared statements (used for optimizing code)
+
+#eg using prepared with select
+prepare GetOrderStatement From 'select clientID, ProductID, Quantity,Cost from orders
+where OrderID = ?' # ? indicates requiring an input value
+
+@order_id = 10;
+execute getOrderStatement using @order_id; #using it.
+
+# mysql speedily parses through json key value pair structure.
+create table Activity (ActivityID int primary key, Properties JSON);
+
+Insert into Activity (ActivityID, Properties) 
+Values (1, '{'clientID': 'CL1', "ProductID": 'P1', 'Orders': 'True'}'),
+        (2, '{'clientID': 'CL2', "ProductID": 'P2', 'Orders': 'True'}'); # notice the dictionary mapping
+
+select ActivityID, Properties->'$.ClientID', Properties->'$.ProductID', Properties->'$.orders'
+from Activity; # returns a table of values.
+
+
+/* insert, deletion and update anomaly can be solved by better database design
+(normalization) */
+# normalization involves splitting data into different tables to reduce duplication and is very relevant 
+# when working with databases. because changes are performed with code.
+
+# extras
+
+
+# use 'and' and 'or' in the where column
+# between operator
+select * from table_name
+where column_name between value1 and value2
+
+select x.column1, x.col2, y.col1, y.col2  Using ailiases before defining
+from table1 as x, table2 as 
+where x.col3 =12;
+
+# using group by and where place the where before the group by else use having
+# however where at this place is limited and won't affect the filter. use having insted
+
+# using the replace command to update data. it first checks for a duplicate key.
+# use it just like insert
+
+replace into tablename (col1, col2, col3) values (1, 'name', 3.4) /* this works if there isn't any data
+ and if there is. it deletes the previous and assigns the new. */
+
+ # another way to use replace
+ replace into tablename 
+ set col1 = val1, col2 = val2, col3 = val3; # assign to all colum else those unassigned will be given default values.
+
+ # COPY TABLES
+
+create table new_table_name
+select column_names from existing_table_name; # copies the column and values. use * for all columns
+
+#copying from a different database
+create table database_x_name.new_table_name 
+select columns from database_y_name.existing_table_name;
+
+#NB: copying doesn't copy constraints, we'll have to assign them back
+
+# exact copy
+create table new_table_name like old_table_name;
