@@ -1,0 +1,258 @@
+# Create a login with docker hub
+
+# run will check local, if not there, it pulls from docker hub. Find the container from docker hub first 
+# to get the name right.
+docker pull container_name: version
+docker run container_name: version    
+
+docker run postgesql:9.6
+
+# docker image: the actual package together with the dependencies
+# docker container: pulling to local and creating an environment where it runs.
+
+docker images    # check all the images pulled from docker hub
+
+# Tag us the version of the image pulled. only images are pulled, we'll have to create a container
+# to make it possible to connect to the application
+
+docker run image_name           # creates a container and runs the image
+
+docker ps -a          # show a list of running containers
+
+docker run -d       # starting the container in a detach mode. (prints container ID on screen)
+
+docker stop container_ID   # restarting a docker container
+docker start container_ID
+
+# to connect to two containers at ones using binding to ports on your laptop. using separate ports
+# if its two different versions of the same container, use two ports but bind both to one.
+
+ducker run container_1
+docker run container_2
+docker ps -a        # two containers  showing
+docker run -d -p laptop port_1: port_from_container 
+docker run -d -p laptop port_2: port_from_container
+
+docker -d -p6000:6423       # using docker to run and bind port 
+# NB: docker run, combines docker pull and docker start
+# NB: -d is detach mode, it makes it so that you can continue using the termial
+
+
+
+#docker troubleshooting commands
+
+docker logs container_name  # this isn't the same as image, when u run docker ps
+
+
+#renaming your containers to help with naming
+docker run -d -p600:543 --name new_name old_name
+
+# if bin/bash doesn't work, use bin/sh  
+docker exec -it  container_id bin/bash          # enables you to go into the container like a directory. use comands like ls, cd etc
+
+
+# NB: docker packages applications and their dependencies in a container so that we don't need to download the application to use them
+# typical example of using mysql for your application without downloading it.
+
+docker pull mysql:latest
+docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 mysql:latest
+docker run -d --name mysql-container -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 -v /path/on/host:/var/lib/mysql mysql:latest           #to persist the data use -v
+mysql -h 127.0.0.1 -P 3306 -u root -p       # connect to mysql
+
+
+# when deploying, the deployment environment pulls two containers, one from your private docker repo, the other from the public mysql repo
+
+# Overview of docker for CI/CD 
+
+# you can configure actions in such a way that as you're pushing the code, it generates pushes to the docker repository, that is then linked to the deployment environment.
+# you should only build the docker image on your local machine when you want to test, otherwise, just set everything up for github to create the container registry. (configure CI/CD for github or for docker, github container registry understands Docker commands, workflow setup is a bit different)
+
+
+
+# Docker networks, 
+# two containers can communicate with each other in an isolated docker network. an python or js application will connect to them using localhost
+
+docker pull mysql:latest      # the database container
+docker pull mysql-express       #an interractive ui container to see database entries
+
+#file name is app.py(it is connected to a html page and FastAPI is the frontend)
+
+docker network ls       # docker default network is showing
+
+docker network create mysql-network     #creates a new network
+docker network ls       #now shows the new network
+
+#NB: check the documentatation for the docker image for the default port and how to run and use it
+
+docker run -d --name mysql-container --network mysql-network -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 mysql:latest
+
+
+# or using multiple line using the backward slash
+# run the mysql docker container
+docker run -d \
+ --name mysql-container \
+ --network mysql-network \
+ -e MYSQL_ROOT_PASSWORD=password \
+ -p 3306:3306 mysql:latest
+
+docker run -d \
+-p 8081:8081 \
+--network mysql-network \
+-e ... \
+mysql-express                 #find the syntax for running and connecting it to mysql container
+
+# NB: if the CLI says app is ready at port 8081, go to browser and enter localhost:8081 to find it.
+# on port 8081, there is an interractive environment created by mysql-express for creating and inserting databases.
+
+# how to connect the database with my app.py file.
+# we specify to use the database for storing inputs from our index.html ui within the app.py file
+
+
+
+# USING DOCKER COMPOSE: it makes codes smaller in size
+# docker compose is built as a .yaml file.
+
+#filename docker_compose.yaml
+version: '3'
+services:
+    my_app:
+        images: image_url_from_registry         # the registry service, ecr provides the url for each image version
+        ports:
+        -3000:3000              #our app is litening on 3000, this was configured in the main app file
+    mysql:
+        images: mysql
+        port:
+        - 2071:2071
+        environment:
+        -MYSQL_USER_NAME=admin    #actual values
+        -MYSQL_ROOT_PASSWORD=password    #actual values
+    mysql-express:
+        images: mysql-express
+        port:
+        -8080:8080
+        environments:
+        -MYSQL-CONFIG_1= kdkdk
+        -MYSQL-CONFIG_2 = kekek
+
+
+#CLI for running
+docker-compose -f mysql.yaml up         # creates a default network and run both containers inside the network
+
+docker network ls
+
+#close the network and container
+docker-compose -f mysql.yaml down     #closes the container and network
+
+
+#NB: delete a container then the image. stop the run first
+
+docker stop container_id
+#deleting a container
+docker rm container_id    #find that using 'docker ps -a'
+# deleting an image
+docker rmi image_id      #find image id using 'docker images'
+
+
+
+
+'''Dockerfile'''                    #useful for building the docker image
+
+FROM python: 3.8    #specify the engine
+
+ENV  MYSQL_USER_NAME=admin       #specify the environmental variables, you can specify these here instead of in the docker-compose
+
+RUN mkdir -p /home/app            # created within the container (run executes linux commands)
+
+COPY ./home/app                     # copies from the local /home/app. it is good practice to have it copy only the actual code, not gitignore, .github, dockerfile etc.
+
+ENTRYPOINT script.sh                # run other shell commands
+
+CMD ['python', '/home/app/app.py']            # a CLI command 'python app.py'  it is understood as a single entry point (use the full path).
+
+
+
+# how to build the docker image on the CLI
+
+docker build -t my-app:1.0          #name:version(tag)
+
+docker images          # shows a list of available docker images.
+
+docker run my-app:1.0
+
+#get specific container log
+docker logs container_id
+
+docker exec -it  container_id bin/bash          # enables you to go into the container like a directory. use comands like ls, cd etc
+ls /home/app       # we'll see that the docker image copied all the files within our directory.
+
+
+
+
+
+# Docker repository
+
+#create a private repository (docker registry) using aws ecr (elastic container repo). name it with your image name, u can leave out the version
+
+# pushing into that repo
+docker login          #you will have to use your ecr credentials
+
+#NB: the docker registry also provides a script for authentication. but you'll have do download aws cli and set the credentials
+
+# the docker registry also provides the code for pushing our image to the registry.
+docker tag ...
+
+docker push ...
+
+# if changes are made, we'll have to rebuild the image with a different version number. one docker registry can contain multiple versions of the same image.
+
+
+
+'''Deploying your image from registry to deployment environment'''
+
+# The docker-compose.yaml is used to create an environment for our app and other images.
+
+docker login            # use the ecr code for logging in provided
+
+# if local, we'll copy our docker-compose file 
+vim compose.yaml
+
+# press 'i' to begin editing
+# pres ':wq!' to end and save.
+
+#then run
+docker-compose -t compose.yaml
+
+
+
+
+
+# Persisting data in docker. after container turns off, the data is lost. we can use docker volumes to address this.
+
+#creating with docker-compose
+
+services:
+    mysql:
+        image: mongo
+        port: 234:234
+        volumes:
+        -db-data:/var/lib/mysql/data        # db-date: location to save on local,var/lib/mysql/data: datapath from registry
+
+
+volumes:
+    db-data:             # define the volumes
+        driver: local
+
+
+
+
+'''SUMMARY'''
+
+# complete each individual file and code. for ml, develop or import the model then create the predict function in prediction.py
+# use backend service (FastAPI) to link database, frontend (html, css pages), model together. and specify the ports.
+# put all app files (frontend, backend and model) into a webapp folder. Add the __init__.py file
+# put all the test files into the test folder. Add the __init__.py file
+# create the other relevant files: .gitignore, setup.py, requirements.txt
+# create the Dockerfile. build the docker image and push to container registry
+# create the docker_compose file to run the docker container network comprising app image and database. put environmental variables here
+# create a github worflow.yml file to build a new image version using 'Dockerfile', then push to container registry.
+# run the docker_compose to deploy locally.

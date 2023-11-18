@@ -1,0 +1,284 @@
+
+# YML is a serialization language like xml and json
+# space indentation is required.
+
+# Key-value pairs
+
+app: user-authentication #string dosen't have to be enclosed with quotes. use quotes if there is a special character
+port: 9000
+version: 1.7
+
+#objects 
+microservice: #microservices.
+  app: user-authentication
+  port: 9000
+  version: 1.7
+
+# list of objects
+microservices:
+  - app: user-authentication #object 1
+    port: 9000
+    version: 1.7
+  - app: shopping-cart #object 2
+    port: 9002
+    version: 1.9
+    table: True
+    versions: [1.9, 2.0, 2.1] # another way to list single values
+
+
+# list of single values
+microservices:
+  -user-authentication
+  -shopping-cart
+
+# multiline string. (can be used to define sequence of command line script)
+
+multilineString: | # using the pipe operator
+  this is a multilline string
+  that should all be one text.
+
+# multiline to be represented as one line.
+multilineString: >
+  this is text that i want
+  to be displayed as a single line
+  but i just typed in multiple lines
+  for convention.
+
+# Place holders
+metadata:
+  name: {{.values.services.name }} # instead of defining the values inside, we make use of placeholders.
+
+
+# multiple config in one file
+
+multilineString: >
+  this is text that i want
+  to be displayed as a single line
+  but i just typed in multiple lines
+  for convention.
+
+---  # this is used to separate config
+
+multilineString: >
+  this is text that i want
+  to be displayed as a single line
+  but i just typed in multiple lines
+  for convention.
+
+
+
+---
+---
+.yml for pusing to docker hub using github actions.
+# deploying to azure cloud follows a sequence of steps. these are 
+name: Build and deploy Python app to Azure Web App
+
+env:
+  AZURE_WEBAPP_NAME: your-app-name  # set this to the name of your Azure Web App
+  PYTHON_VERSION: '3.8'              # set this to the Python version to use
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python version
+        uses: actions/setup-python@v3.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
+
+      - name: Upload artifact for deployment jobs
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-app
+          path: |
+            .
+            !venv/
+
+  deploy:
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Development'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: python-app
+          path: .
+
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+
+---
+---
+# push docker image to docker hub.
+sequence of steps
+1 name 
+2 trigger action
+3 setting up the job
+4 checking out the repo
+5 setting up python
+6 installing dependencies
+7 building the docker image
+8 deployment envronment workflow setup
+
+# if you are uncertain of the steps, find a repo that has done something similar and edit.
+
+name: Trigger auto deployment for demo-container
+
+env:
+  AZURE_CONTAINER_APP_NAME: demo-container
+  AZURE_GROUP_NAME: demo-container
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo. Remove comments to enable
+  #push:
+  #  branches: 
+  #    [ main ]
+
+  # Allow mannually trigger 
+  workflow_dispatch:      
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to GitHub container registry  # this is one container registry appealing when using github for CI/CD, Docker hub is another option.
+        uses: docker/login-action@v1.10.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Lowercase the repo name and username
+        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
+          file: ./Dockerfile
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }} # these placeholders are defind in you github secrets settings.
+
+      - name: Lowercase the repo name and username
+        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
+      - name: Deploy to containerapp
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az config set extension.use_dynamic_install=yes_without_prompt
+            az containerapp registry set -n ${{ env.AZURE_CONTAINER_APP_NAME }} -g ${{ env.AZURE_GROUP_NAME }} --server ghcr.io --username  ${{ github.actor }} --password ${{ secrets.PAT }}  
+            az containerapp update -n demo-container -g demo-container --cpu 2 --memory 4Gi
+            az containerapp update -n ${{ env.AZURE_CONTAINER_APP_NAME }} -g ${{ env.AZURE_GROUP_NAME }} --image ghcr.io/${{ env.REPO }}:${{ github.sha }}
+
+# the place holders in inline were defined above. github.actor is a placeholder for the user.
+
+
+---
+
+# using Docker hub for building and pushing docker image to registry.
+
+# This is a workflow that builds the container and pushes it to Dockerhub
+
+name: Build to Dockerhub
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check out the flask-app repo
+        uses: actions/checkout@v2
+
+      - name: Authenticate to Docker hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v1
+        id: buildx
+
+      - name: build flask-app and push to dockerhub
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile
+          push: true
+          tags: alfredodeza/flask-app:latest
+
+
+---
+
+# NB: multiple flows are used for a single app. They could be multiple files or separated with (---) 
+1 Continuous Integration
+2 Build to Dockerhub (container registry)
+3 Build and deploy a container to Azure web App.
+
+resources: https://docs.github.com/en/actions, https://github.com/marketplace?type=actions
+
