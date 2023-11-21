@@ -20,7 +20,7 @@ except Exception as e;
 # we can also pass multiple exceptions to an except
 except(ZeroDivisionError, TypeError):
 
-# .items(), .keys(), .values() method is specifically used with dictionaries in python 3.12
+# .items(), .keys(), .values() method is specifically used with dictionaries in python 
 
 #finding the methods available to an object. List, tuple, dictionary etc
 for method in dir(tuple()): # this could be any other object.
