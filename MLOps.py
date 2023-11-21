@@ -234,3 +234,16 @@ myapp/
 |   |-- settings.json
 |-- setup.py
 |-- ...
+
+
+# FastAPI and Flask are frameworks that help you package models with interractive UI's
+# You can use them to link html pages and models. They define the data transfer logic.
+
+on CLI we run the app. python app.py. # output listens on port ---
+
+
+
+
+
+
+
