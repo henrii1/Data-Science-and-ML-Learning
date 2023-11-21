@@ -24,7 +24,7 @@ except(ZeroDivisionError, TypeError):
 
 #finding the methods available to an object. List, tuple, dictionary etc
 for method in dir(tuple()): # this could be any other object.
-    if method.startswith('__'):
+    if method.startswith('__'):         # printing all the methods associated with the class object.
         print(method)
 
 
