@@ -42,19 +42,52 @@ shopping.extend(["sugar", 'salt']) # yeilds an extended list
 shopping.pop(1) # removes from the list using index
 shopping.remove('salt')  # use remove to specify the value
 
+# ADDED METHODS.
+shopping.clear()      #clears the list
+b = shopping.copy()   # shallow copy
+shopping.count("a")      # counts the number of a's in our list
+shopping.extend([2, 3])  
+shopping.index('ada')   # returns the index of 'ada' use a print to view
+shopping.insert(1, 'ada')    # insert at an index
+shopping.pop()            # pops the last value, returns it but takes it out of the list
+shopping.pop(0)        # popes by index
+shopping.remove('ada')  # removes by value.
+shopping.reverse()      # reverses the list
+shopping.sort()          # sorts alphabetically.
+shopping.sort(key=lambda name: name.lower(), reverse= True)    # using the lambda function to specify sort condition, also you can reverse the sort.
+
+
+
 # Dictionaries
 contact = {}
 contact['height'] # height is meant to be the key
 print(contact['height']) # should print the value associated with this key
-
 # using the .get() method will return None if key isn't found.
 result = contact.get('height')
 print(result)
-
 result = contact.get('height', '6ft')
 print(result) # if result is None, the .get method assigns default value '6ft'
+result.pop("age") # pops out the value and key
 
-result.pop("age") # pops out the value and key 
+# Dictionary Methods.
+users: dict = {0: 'Mario', 1: 'Luigi', 2: 'James'}             # using hint type to define a dictionary.
+users.values()             # returns a list of the values and can be assigned to a variable and iterated over.
+users.keys()               # returns a list of keys in our dict, returns a list that is iterable
+users.pop(2)               # requires a key. it returns the value poped also
+users.popitem()             # pops the last item in our dict. you  can use recursively to continuously remove elements at the end. also returns the item poped
+my_copy = users.copy()      # shallow copy (if a value is changed in one, it reflects in the other)
+print(f"{id(my_copy)} and  {id(users)}")      # using id returns the reference id of the variable.
+a = users.get(1)     #users.get(333, "missing value")       # stores the values of the index, if it doesn't exist, sample code prints missing value
+a = users.setdefault(1, 'Missing') #same as get but requires a default value if index isn't found
+dict_from_list: dict = dict.fromkeys(a, __value = 'Unknown')   # a should be a list. the values in a becomes the keys and their value defaults to none if not set.
+users.items()          # returns a nested tuples inside a list, containing key and value.
+users.update({key: value})  # update a key and its value
+users | {4: "ade", 5: "bade"}     # using '|' is a union and extends the dictionary
+users |= {4: "ade", 5: "bade"}
+
+
+
+
 
 #functions
 
