@@ -242,7 +242,168 @@ myapp/
 on CLI we run the app. python app.py. # output listens on port ---
 
 
+# Infrastructure as code: Makefile, github actions, Dockerfile.
+#cloud environment: AWS cloud9, github codespaces
+# using codespace
+# setup codespace from the code part of github
 
+# setup virtual env
+which virtualenv
+virtualenv ~/.venv
+source ~/.venv/bin/activate
+which python
+
+# persist the virtual environment even after loading a new terminal
+vim ~/.bashrc
+# at the bottom of the file enter the following
+source ~/.venv/bin/activate # then close vim  ':wq!"
+
+pip freeze | less        # used to see all the installed packages.
+#files to create
+Makefile
+requirements.txt
+
+#makefiles are simple text files that execute unix-like commands, they define dependencies among components, very similar to a dockerfile
+install:
+      pip install --upgrade pip  &&\
+          pip install -r requirements.txt
+
+test:
+        python -m pytest -vv test_hello.py
+
+format: 
+        black *.py
+
+lint:
+        pylint --disable=R,C hello.py        # disable error levels less than warning (there are two less by default represented by R,C)
+
+all: install lint test format
+
+# Does formatting and installation: Cli code
+make install, make format, make test, make lint, make all (does everything). # these are the steps we defined. They are the usual steps for software dev.
+# for instance we would have done pip install -r requirements.txt, but we did make install.
+# pylint is a linting tool, black is for formatting.
+
+# for codespace most times install ipython so that you can interract with the terminal like you would on vscode
+# Noah Gift, Alex Odeza
+
+# cloud environments are important because they give you an environment that will be similar to that of deployment
+
+
+#Noah gift
+
+#linting, testing and formatting actions: %pytest (wildcard)
+#hugging face text summarization model used with gradio and deployed to huggingface spaces. CI was set to huggingface too: hugging-face-demo, huggingface(notice the extra thing added to the readme)
+# FastAPI app deployed to amazon : FastAPI
+
+# 3 most important files: Dockerfile, Makefile, requirements.txt
+# greedy algorithm and traveling salesman problem: heuristics
+
+#devcontainer config: stores codespace configurations. right click extensions and add to .devcontainer
+nvidia-smi    # shows gpu info 
+htop          # show codespace storage info
+
+#git copilot labs extension is used to translate code from one language to another
+
+#making your python files directly executable
+#!/user/bin/env python   # write this within the file. the first line. hash included
+
+#cli scripts
+chmod +x filename.py
+
+#run
+./filename.py
+
+#using the click module to build command line script(tool): devops-skills-with-github
+
+# NB: sdks are platforms where you can build, train and deploy your ml models such as azure machine learning and amazon sagemaker
+# NB: specific services for serverless computing are Azure Functions and Amazon Lambda.
+
+# Basic workflow with Amazon ECR and ECS:
+#> create code and test using cloud env like codespace and create the docker image(github actions) and pus to Amazon Elastic Container Repo
+#> then link to Amazon Elastic Container Service (configure properly for deployment). then deploy the service.
+
+#AWS lambda functions: we create them like normal functions, we just need to select the language and write the function
+# Step functions are used to combine multiple lambda functions together.
+
+#setting up and using azure databricks: Noah Gift: databricks repo---databricks is used for analysing data for data science and ML
+
+# AWS Glue is used to consolidate multiple data sources together.
+# NB: A JOB refers to the execution of a specific task, workloads are a specific set of tasks or activities that needs to be performed by a system
+
+#linting code after writing helps us identify all errors and logs before we run them. linting checks the syntax, test files test the logic.
+# files: Makefile (they only work on unix, which is why u should use cloud dev environments like codespace), test.py (test logic), requirements.txt, Dockerfile.
+# Click module is used for creating command line tools. take an example from Noah Gift or from the click documentary. fire library is the easiest  way to create a command line tool.
+# indentation problems are fixed with 'black' the formatting tool. it is a very nice idea to use makefiles.
+
+#for ECR, the dockerfile should be 'FROM public.ecr.aws/lambda/python3.8' 
+
+
+'''Deploying a microservice from scratch with AWS'''  #From-Zero-To-Deploy    Noah Gift
+#create requirements.txt, Makefile, test, Dockerfile, etc
+#write code and push to github
+# setup codespace, use it to lint, format and test code (u can write all the code here too--consider copilot)
+# clone code to Amazon cloud 9  (you can write all the code here too)
+# create an Amazon ECR repository, create docker image and push to the repo. use Amazon code build to continuously push the latest version of your code to ECR. use amazon lambda repository for bigger images
+# use Amazon App Runner to deploy as a microservice. (You'll be able to see the routes and can check out response and all from the swagger docs)
+
+#NB: the predict function is set as a route, then some code is added to it to facilitate it, check Noah Gift repos(Form-zero-to-deploy, mastering functions)
+#NB: check the python version in your environment to set docker and github actions.
+
+#'command palete' enter configure dev container features and select github codespace configuration.
+import ipdb; ipdb.set_
+
+# repos: devops-skills-with-github, Function from zero
+# Bash APIs can be developed to test out soe models using AWS cloud.
+
+
+'''Course 3: MLOps Platfroms'''
+
+#Amazon Sagemaker studio lab: something like google colab, it also offers a shell.
+nvidia-smi -l1     # shows gpu configurations
+
+#Aws Cloud Shell: a command line that is integrated inside the AWS ecosystem
+#> you can change the shell environment to bash, powershell etc. To work with files, you'll have to upload them.
+#> There is a way to upload multiple files. you can download files as well. There is also AWS cloud9 (like vscode)
+
+# on Aws cloud shell: 
+aws comprehend help   #shows all the ml services that it can perform by default.
+aws text-detection help # shows all the methods associated with text-detection
+
+# Cloud9: resource like vscode
+aws s3 ls   # list all the service buckets you have
+
+#AWS has a lot of storage mediums for any kind of data, and any kind of job
+
+# Amazon s3: (Simple Storage System)
+#> a fundamental storage container that stores objects (text, videoes etc). It is like a top level folder or directory in which we store data
+#> important and attempts to correctly manage buckets for all the various Amazon services.
+aws s3 cp help  # provides commands for copying from shell or cloud9 to a bucket.
+
+# you can query s3 files with SQL
+
+#Working with Batch and stream data
+#STREAM: Kinesis, Amazon MSK Kafika
+#BATCH: AWS Glue, AWS Batch AWS Step Functions
+
+#AWS batch is used to partition the GPU for the amount of jobs it can do per time. it also does general batching
+#AWS Glue: a serverless (Extract Transform Load) ETL system. you can point it to multiple datasources for it to consolidate or integrate. then store in a bucket in s3
+#AWS Athena: is used to query data available in the amazon ecosystem. SQL queries.
+#EMR Studio: creates a flexible environment where u can set how many gpus, and clusters to run your notebooks, depending on the job.
+
+#Sagemaker has a robust documentation of the algorithms available within and their uses. It purports to abstract the native code-wise model building process by automation
+
+#AutoML is a tool that helps with choosing the right machine learning model for a task as well as the hyperparameters.
+
+#Amazon Sagemaker Canvas: import data from local or s3 bucket, it provides visualization icons like excel, you could also type in formulas, without coding.
+#>select the data and click build a model. it scans and automatically selects a model to build with, u can see the metrics for each.
+
+#AWS EC2 (Elastic compute cloud): is a service that provides resizable compute capacity in the cloud for running virtual environments
+
+#ECS and App Runner both deploy but ECS if for only containerized applications and utilizes EC2. App runner is for ease of use, for both containerized and non-containerized applications.
+#> you won't also need to worry about setting up much IAC for managing compute and clusters.
+
+#For ECR and App runner, running fastAPI apps, check vid "Running Pytorch with Aws App: course 3.4"
 
 
 

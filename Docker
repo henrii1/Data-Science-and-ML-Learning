@@ -222,7 +222,8 @@ vim compose.yaml
 #then run
 docker-compose -t compose.yaml
 
-
+docker image ls    #lists the images available
+docker run -p 127.0.0.1:8080:8080 container_id     # find the id from running 'docker image ls'
 
 
 

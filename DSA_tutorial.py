@@ -422,7 +422,7 @@ df['good'] = df['rating'].apply(good_wine) # Adds a new column called good, if r
 
 # Tuples are faster than lists, and they are used when you don't want the data to be updated
 
-# Dictionary key must be immutable. the values musn't. Dictionarys are unordered also.
+# Dictionary key must be unique. the values musn't. Dictionarys are unordered also.
 
 # use the set constructor to create an empty set: set() or s = set([1,2]) passing a list into the set {1,2,3}. sets are on ordered.
 
@@ -489,7 +489,7 @@ while True:                            # always going to run
 from collections import deque
 stack = deque()
 stack.append(23)
-stack.appenda(24)
+stack.append(24)
 stack.pop()
 
 #check empty, 
@@ -517,7 +517,7 @@ stack.get(timeout=3)    # sets the timeout so that it can print 'queue is empty'
 queue = []
 queue.append(10)
 queue.append(20)
-queue.pip(0) # pops the first element entered
+queue.pop(0) # pops the first element entered
 
 # using insert and pop
 queue = []
@@ -529,7 +529,7 @@ queue.pop()
 not queue
 
 
-queue[]
+queue = []
 def enqueue():
     if len(queue) == n:
         print("List is full")
@@ -539,6 +539,9 @@ def enqueue():
         print(queue)
 
 def dequeue():
+    if not queue:
+        print("queue is empty")
+        return
     e = queue.pop(0)
     print(f"Removed element {e}")
 
@@ -669,7 +672,7 @@ class LinkedList:
                 print(n.data, '-->', end=" ")  # this make our output of form 4 --> 5
                 n = n.ref        # n will be null at the last node
 
-# self.head is the reference to a particular node. self.head.data is the data in the node. self.head.ref is the reference of the next node.
+# self.head is the reference to the first node. self.head.data is the data in the node. self.head.ref is the reference of the next node.
 
 
 #Adding elements: add can be done at the begining, middle or end of the linked list
@@ -874,7 +877,7 @@ class doublyLL:
             n = self.head
             while n.nref is not None:
                 n = n.nref
-            while n is not None:                 # first node pref is None, last node nref is None too.
+            while n.pref is not None:                 # first node pref is None, last node nref is None too.
                 print(n.data, "-->", end = ' ')
                 n = n.pref
 
@@ -1051,7 +1054,7 @@ class doublyLL:
 # leaf nodes, or terminal nodes are those without children
 
 # if we have n nodes, we'll have n-1 edges.
-# threes are recursive. they contain sub trees.
+# trees are recursive. they contain sub trees.
 
 #node degree: total number of children associated with that node
 #Tree degree: highest node degree is equal to tree degree.
@@ -1254,8 +1257,30 @@ class BST:
 #DELETING THE ROOT NODE
 
 # consider if root is a leaf node, contains only one child or two children
-
-
+    #was written by me, proof check it.
+    def delete_root(self):
+        if self.key is None:
+            print("There is no node within the tree")
+            return
+        if self.lchild is None:
+            if self.rchild is None:
+                self.key = None
+                return
+        if self.lchild:
+            temp = self.lchild
+            while temp.rchild is not None:
+                temp = temp.rchild
+            temp = temp.delete_root()
+            self.key = temp.key
+            temp.key = None
+            return
+        if self.rchild:
+            temp = self.rchild
+            while temp.lchild is not None:
+                temp = temp.lchild
+            temp.delete_root()
+            self.key = temp.key
+            temp.key = None
 
 
 
@@ -1330,7 +1355,7 @@ else:
 # Binary heap is a complete binary tree that satisfies heap properties.
 #HEAP:Parent node needs to be less than or equal to, or greater than or equal to its children
 
-# Min Heap: root node is less than or equal to the parent. root key is smallest, and recursively true
+# Min Heap: root node is less than or equal to the children. root key is smallest, and recursively true
 # Max Heap: root node is greater than or equal to parent. root key is greatest, and recursively true.
 
 #USES: implementing priority queues, used for sorting and finding largest or smallest values.
@@ -1352,6 +1377,7 @@ else:
 
 # Extracting min and max is just heapifying min or max and taking the root value.
 
+#NB: heap works by moving values in order to achieve its properties.
 
 # Creating a binary tree.
 #>> create a complete binary tree, then heapify (start lowest and last parent node in the complete BT, complete that level then upwards )
@@ -1362,13 +1388,13 @@ else:
 '''lchild index = (2 * i) +1,  rchild index = (2 * i) + 2'''
 def max_heapify(arr, n, i):
     largest = i
-    left = 2*i + 2
+    left = 2*i + 1
     right = 2*i +2
     # largest so far, compared with the left
     if left < n and arr[largest]< arr[left]:
         largest = left
     # largest so far, compared with right
-    if right <  and arr[largest] < arr[right]:
+    if right < n and arr[largest] < arr[right]:
         largest = right
 
     #change parent
@@ -1380,6 +1406,7 @@ def max_heapify(arr, n, i):
     
 
 arr = [2,3,54,50,12,3]
+
 n = len(arr)
 
 #building max heap
