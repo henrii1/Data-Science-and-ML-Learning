@@ -406,5 +406,12 @@ aws s3 cp help  # provides commands for copying from shell or cloud9 to a bucket
 #For ECR and App runner, running fastAPI apps, check vid "Running Pytorch with Aws App: course 3.4"
 
 
+# Actions
+#> for pushing to github container registry: alfredodeza/huggingface-ghcr
+#> for pushing to Azure container registry: alfredodeza/huggingface-deploy-azure   (mainly: alfredodeza/huggingface-azure-acr)  : course 4.3
+#> pushing to azure container registry and deploying to azure container app: alfredodeza/huggingface-azure-acr   : course: 4.4
 
+#Hugging face models can be finetuned for various domain tasks. Hugging face has example codes to guide finetuning.
+
+#Regardless of what language or framework models are built, we can export to the ONNX format to be used in any platform regardless of the building framework.
 
