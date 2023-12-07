@@ -405,6 +405,39 @@ aws s3 cp help  # provides commands for copying from shell or cloud9 to a bucket
 
 #For ECR and App runner, running fastAPI apps, check vid "Running Pytorch with Aws App: course 3.4"
 
+'''MLFlow'''
+pip install mlflow
+
+mlflow ui          #creates a simple ui on local host
+
+from mlflow import log_metric, log_param, log_artifactt
+
+if __name__=="__main__":
+    log_param("threshold", 3)
+    log_param("verbosity", "DEBUG")         #parameter values are logged
+
+    log_metric("timestamp", 1000)           #metrics are logged also
+    log_metric("TTC", 33)                   # time to complete
+
+
+    log_artifact('dataset.csv')
+
+#run the file with 'python filename.py' then refresh the ui you will notice that mlflow captured all our logs
+
+# to create a new experiment use the terminal and run 
+mlflow experiments create --experiment-name select_name     # the output is an id.
+MLFLOW_EXPREIMENT_ID=id_obtained python select_name.py
+
+
+
+# check mlflow example on github to run an ml project with multiple parameters
+#> required files: MLproject (specifies the hyper parameters), conda.yaml, model and dataset.
+
+mlflow run github_ssh_address
+
+mlflow run github_ssh_address -P hyperparameter_name new_value
+
+
 
 # Actions
 #> for pushing to github container registry: alfredodeza/huggingface-ghcr
