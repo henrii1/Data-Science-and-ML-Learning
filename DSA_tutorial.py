@@ -1,4 +1,83 @@
 # python
+
+"""OS module"""   #designed for performing file system actions
+import os
+
+# current directiory
+print(os.getcwd())
+
+#change directory
+os.chdir("C:\Python")
+
+#list directories
+a = os.listdir(os.getcwd())     #prints all the directiores from cwd
+print(a)
+b = os.listdir(r"C:\\emerald")   # using backslash will require two and r since \ is used for new line
+
+# making directiories
+os.mkdir("pictures")
+
+os.makedirs("Pictures/Trip pic/November", exist_ok=True) # making  multiple subdirectories and folders. exist_okay is used so that it won't create if it already exists
+
+#deleting
+os.rmdir("Pictures")
+os.removedirs("Pictures/name")
+
+a = "Text"
+combine = os.path.join(os.getcwd, a) # joins the path and creates the file
+
+print(os.path.exists(combine))  #returns a boolean if exist or not.
+
+#checking if its a file or a directory
+print(os.path.isdir(combine)) #True
+print(os.path.isfile(combine)) #False
+
+#info about the file or folder. most times, just print the entire info, then you can pick which one you want.
+print(os.stat(combine)) # you can access the attributes of stats by adding a '.' after (combine). eg below
+print(os.stat(combine).st_size)
+
+# pulling out environment variables
+print(os.environ.get("PATH"))             # PATH is a variable set by default.
+
+print(os.getlogin())  #prints the current user.
+
+
+"""SYS module in python"""
+import sys
+
+# string containing a platform identifier (win32 for windows, linux for linux)
+print(sys.platform)
+
+#string contining the copyright of the interpreter
+print(sys.copyright)
+
+# version number and build number of python interpreter
+print(sys.version)
+
+# giving an output, just like print
+sys.stdout.write('string')
+
+# printing errors
+sys.stderr.write("string")
+
+# size of variable
+s = 4
+print(sys.getsizeof(s))
+
+# list of command line arguments passed to a script
+print(sys.argv)  # returns a list of our command line commands
+
+"""re module"""         # regular_expression
+import re
+names = ['Finn Binde', "abig zes", 'goat skin']
+regex = '^\w+ \w+$'
+for name in names:
+    result = re.search(regex, name)  # how regex are applied
+^Fran # for all starting with 'Fran:
+
+
+
+
 groceries = [] # this evaluates to false when there isn't any value within
 if groceries:
     print('done') # doesn't print because it evaluates to false
@@ -435,6 +514,59 @@ s.add(34) # adding values into sets, they are mutable.
 
 for i in s:
     print(i)
+
+
+'''Search Algorithms'''
+# Linear Search: compares elements one after the other. complexity is O(n)
+from typing import List
+
+list = [2, 8, 3, 6, 4]
+
+def linear_search(value: int, list: List):
+    i = 0
+    while i <= len(list)-1:
+        if list[i] == value:
+            print(f'{value} found at index {i}')
+            i += 1
+            return True
+        else:
+            print(f"number {value} is not in the list")
+    return False
+
+
+# Binary Search: works only on sorted lists. complexity is O (logn)
+
+from typing import List
+
+def binary_search(value, lst: List):
+    L = 0
+    U = len(lst) - 1
+
+    while L <= U:
+        mid = (L + U) // 2
+
+        if lst[mid] == value:
+            print(f"Value found at index {mid}")
+            return True
+        elif lst[mid] < value:
+            L = mid + 1
+        else:
+            U = mid - 1
+
+    print("Value not found in list")
+    return False
+
+# Example usage:
+my_list = [2, 4, 6, 8, 10, 12, 14, 16]
+result = binary_search(10, my_list)
+print(result)
+
+
+
+
+        
+
+
 
 '''Stacks'''
 # ordered collection of object from top to base. stores data using the 'last in first out' or 'first in last out' manner
@@ -2088,7 +2220,7 @@ class Trie:
         return True
     
 
-'''Memoization'''
+'''Memoization or Top-Down dynamic programming'''
 
 # for recursive functions, store the values for previous calls so that future calls won't have to repeat the work.
     
@@ -2130,6 +2262,18 @@ def fibonacci(n):
 # for n in range(1, 101):
 #     print(n, ':', fibonacci(n))
 
+# method 2: implementing memoization
+def fib_memoized(n):
+    def fib(n):
+        if n <= 1:
+            return n
+        else:
+            return fib_memoized(n-1) + fib_memoized(n-2)
+    cache = {}
+    if n not in cache:
+        cache[n] = fib(n)
+    return cache[n]
+
 
 
 #Using python built in lru_cache module for memoization
@@ -2149,7 +2293,7 @@ def fibonacci(n):
 #     print(n, ':', fibonacci(n))
 
 
-'''Tabulation'''
+'''Tabulation or Bottom-up dynamic programming'''
 
 # using tables to store previously processed values
 
@@ -2176,3 +2320,215 @@ def fibonacci_tabulation(n):
 n = 10
 result = fibonacci_tabulation(n)
 print(f"The {n}-th Fibonacci number is: {result}")
+
+
+# Example: finding the minimum number of coins to make a change using Tabulation.
+
+def min_coins_dynamic_programming(coins, amount):
+    # Create a table to store the minimum number of coins for each amount
+    dp = [float('inf')] * (amount + 1)                                       # list should store infinity equals to the amount + 1 value
+    dp[0] = 0  # Base case: 0 coins needed to make change for amount 0
+
+    for coin in coins:
+        for i in range(coin, amount + 1):
+            dp[i] = min(dp[i], dp[i - coin] + 1)
+
+    return dp[amount] if dp[amount] != float('inf') else -1
+
+# Example usage:
+coin_denominations = [25, 10, 5, 1]
+change_amount = 63
+
+result = min_coins_dynamic_programming(coin_denominations, change_amount)
+if result != -1:
+    print(f"Minimum number of coins to make change: {result}")
+else:
+    print("Change cannot be made with the given coin denominations.")
+
+
+# bottom up approach, dynamic programming
+
+
+"""Greedy algorithm implementation"""       # complexity -- if unsorted: O(nlogn), if sorted:O(n)
+
+#When to use greedy algorithms. 
+#> when a global optimum can be arrived at by selecting local optimums, 
+#> when the optimal solution can be composed of optimal solutions of subproblems.
+
+#Problem: given n activities with their start and finish time, select the max number of activites a person can perform.
+#> constraints: Only one activity can be performed per time.
+
+#greedy solution:
+ #> 1, sort the activities according to finish time, select the first activity and print, (next: if the start time of the other activity is 
+ #> greater than or equal to the finish time of the current activity, print activity)
+
+ def activity_selection(start_times, finish_times):
+    n = len(start_times)
+
+    # Create a list of tuples (start_time, finish_time, activity_index)
+    activities = [(start_times[i], finish_times[i], i) for i in range(n)]
+
+    # Sort activities based on finish times
+    activities.sort(key=lambda x: x[1])
+
+    selected_activities = []
+    selected_activities.append(activities[0])
+
+    # Iterate through the sorted activities and select non-overlapping ones
+    for i in range(1, n):
+        current_activity = activities[i]
+        last_selected_activity = selected_activities[-1]
+
+        if current_activity[0] >= last_selected_activity[1]:
+            selected_activities.append(current_activity)
+
+    # Extract the indices of selected activities
+    selected_indices = [activity[2] for activity in selected_activities]
+
+    return selected_indices
+
+# Example usage:
+start_times = [1, 3, 0, 5, 8, 5]
+finish_times = [2, 4, 6, 7, 9, 9]
+
+result = activity_selection(start_times, finish_times)
+print("Maximum number of activities:", len(result))
+print("Selected activity indices:", result)
+
+
+
+# Greedy algorithm solution to find the minimum number of coins
+
+def min_coins(coins, amount):
+    coins.sort(reverse=True)  # Sort the coins in descending order
+
+    num_coins = 0
+    i = 0
+
+    while amount > 0 and i < len(coins):
+        if coins[i] <= amount:
+            # Take as many coins of the current denomination as possible
+            num_coins += amount // coins[i]   # same as num_coins = num_coins + (amount // coins[i] )
+            amount %= coins[i]                # same as amount = amount % coins[i]
+        i += 1
+
+    if amount == 0:
+        return num_coins
+    else:
+        # If amount is not zero, it means it cannot be represented with the given coins
+        return -1
+
+# Example usage:
+coin_denominations = [25, 10, 5, 1]
+change_amount = 63
+
+result = min_coins(coin_denominations, change_amount)
+if result != -1:
+    print(f"Minimum number of coins to make change: {result}")
+else:
+    print("Change cannot be made with the given coin denominations.")
+
+
+
+"""BackTracking"""
+
+# it is used when we want to find all the possible solutions to a particular problem.
+#> it represents the information as a tree using DFS method. eg in how many ways can 2 boys and 
+#> one girl seat on tree chairs such that the girl cannot be in the middle. create a tree of all possible ways and cancel those with a girl at middle.
+
+#solution to the 2 boys, 1 girl problem (this generates all possible permutuations, solve the one for when girl must be in the middle)
+def print_solution(perm):
+    print(" ".join(perm))
+
+def is_valid(perm):
+    # In this example, any arrangement is considered valid
+    return True
+
+def arrange_boys_and_girl(perm, choices):
+    if len(perm) == len(choices):
+        # All positions are filled, print the solution
+        print_solution(perm)
+        return
+
+    for person in choices:
+        if person not in perm:
+            # Add the person to the current arrangement
+            perm.append(person)
+
+            # Check if the current arrangement is valid
+            if is_valid(perm):
+                # Recur to fill the next position
+                arrange_boys_and_girl(perm, choices)
+
+            # Backtrack: Remove the person and try other possibilities
+            perm.pop()
+
+# Example usage:
+boys_and_girl = ['Boy1', 'Boy2', 'Girl']
+arrange_boys_and_girl([], boys_and_girl)
+
+
+#NB: if we want the most optimal solution, we'll use dynamic programming. Greedy method is also used to find optimal solutions
+
+
+#EG: we have a board with 4 rows and 4 columns, we want to place 4 queens to avoid them being in same row, same column or same diagonal
+#> we want to find out all possible solutions: we can draw the tree and use bonding function (while drawing the tree) to cancel any path that breaks the rule
+
+# Solution n-queens (for diagonal from left to right, row index - col index = -1) (for diagonal from right to left, col index + row index = 2)
+
+class Nqueens:
+    def totalNQueens(self, n: int) -> int:
+        column = set()
+        positiveDiagonal = set()    # (row + column) is constant
+        negativeDiagonal = set()    # (row - column) is constant
+
+        result  = 0
+        def backtrack(r):
+            if r == n:
+                nonlocal result       # non local is the opposite of 'Global' we want to make a variable global within a function
+                result += 1
+                return
+            for c in range(n):
+                if c in column or (r + c) in positiveDiagonal or (r - c) in negativeDiagonal:
+                    continue
+                column.add(c)
+                positiveDiagonal.add(r + c)
+                negativeDiagonal.add(r - c)
+                backtrack(r + 1)
+                column.remove(c)
+                positiveDiagonal.remove(r + c)
+                negativeDiagonal.remove(r - c)
+            backtrack(0)
+            return result
+"""Dijkstra's Algorithm"""
+
+# Used to find the shortest path length in a graph.
+
+# In a case where links are costed, when there is no direct path from our start node, we those other nodes to infinity
+# Dijkstra's algorithm doesn't consider negative costed links
+
+class Solution:
+    def shortestPath(self, n: int, edges: List[List[int]], src: int) -> Dict[int, int]:
+        adj = {}
+        for i in range(n):   # number of nodes
+            adj[i] = []
+
+        for s, d, weight in edges:      #source, destination and weight
+            adj[s].append([d, weight])
+
+        shortest = {}    #Map vertex -> distance of shortest path
+        minHeap = [[0, src]]    #src is starting node
+        while minHeap:
+            w1, n1 = heapq.heapop(minHeap)
+            if n1 in shortest:
+                continue
+            shortest[n1] = w1
+
+            for n2, w2 in adj[n1]:
+                if n2 not in shortest:
+                    heapq.heappush(minHeap, [w1 + w2, n2])
+
+        for i in range(n):
+            if i not in shortest:
+                shortest[i] = -1
+        return shortest
