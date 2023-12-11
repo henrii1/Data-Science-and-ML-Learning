@@ -75,6 +75,181 @@ for name in names:
     result = re.search(regex, name)  # how regex are applied
 ^Fran # for all starting with 'Fran:
 
+"""Multiprocessing and Multithreading"""
+
+#threading module doesn't do parallel work because of the GIL
+# threading is mostly used when we require input from user
+import threading 
+import time
+
+done = False
+def worker():
+    counter = 0
+    while not done:
+        time.sleep(1)
+        counter += 1
+        print(counter)     # prints 1, 2, 3  etc 
+
+# worker()
+#input("Press enter to quit")
+#done = True                     #this part won't work without threading because function isn't finished.
+
+threading.Thread(target=worker).start()  #runs in a separate thread
+
+input("Press enter to quit")             # runs in another thread, mostly the first thread
+done = True
+
+#Daemon Threads are those that we specify for termination when others have, regardless eg.
+
+def worker():
+    counter = 0
+    while True:
+        time.sleep(1)
+        counter += 1
+        print(counter)     # prints 1, 2, 3 for ever 
+
+threading.Thread(target=worker, daemon=True).start()
+
+input("Press enter to quit")
+
+#example 2
+def worker(text):
+    counter = 0
+    while True:
+        time.sleep(1)
+        counter += 1
+        print(f"{text}: {counter}") 
+
+t1 = threading.Thread(target=worker, daemon=True, args=("abc",))    # Thread 1
+t2 = threading.Thread(target=worker, daemon=True, args=("xyz",))    # Thread 2
+
+t1.start()
+t2.start()
+
+t1.join()
+t2.join()   # makes sure the tasks above finishes before the one below
+
+input("Press enter to quit")
+
+# using a function for threads
+threads = []
+for _ in range(10):
+    t = threading.Thread(target=worker, daemon=True, args=("abc",))
+    t.start()
+    threads.append(t)  # a list is used because we can't use join directly before all the threads finish
+
+for thread in threads: 
+    thread.join()
+
+
+# threading.main
+import time
+from threading import Lock, Thread
+from urllib.request import urlopen
+
+lock = Lock()
+
+def do_cpu_work():
+    for i in range(20000):
+        2**i
+    
+def do_io_work():
+    print("start")
+    urlopen("https://youtube.com")
+    print("end")
+
+if __name__ == "__main__":
+    threads = []
+    start = time.perf_counter()
+
+    for _ in range(10):
+        t = Thread(target=do_cpu_work)
+        threads.append(t)
+        t.start()
+
+    for thread in threads:
+        thread.join()
+
+    
+    for _ in range(10):
+        with lock:                               # using lock makes it run somehow asynchronously. prints start, end, start, end, instead of start, start, start ...
+            t = Thread(target=do_io_work)
+            threads.append(t)
+            t.start()                          # threading works best for io work such as this
+
+
+
+# Multiprocessing
+
+import time
+from multiprocessing import Process
+from urllib.request import urlopen
+
+
+def do_cpu_work():
+    for i in range(20000):
+        2**i
+    
+def do_io_work():
+    urlopen("https://youtube.com")
+ 
+
+if __name__ == "__main__":
+    processes = []
+    start = time.perf_counter()
+
+    for _ in range(10):
+        t = Process(target=do_cpu_work)
+        processes.append(t)
+        t.start()
+
+    for process in processes:
+        process.join()
+
+    
+ # Asynchronous functions
+
+import asyncio
+
+async def main():
+    print("Hello ...")
+    await asyncio.sleep(1)
+    print("...world!")
+
+async def add(x, y):
+    return x + y        
+
+if __name__ =="__main__":
+    asyncio.run(main())    #prints hello, waits 1 min, prints world
+
+    r = add(5, 6)
+    #print(r)      # wouldn't print the result until we use the await method
+
+#async method mimicks multiprocessing by allowing next tasks to run
+
+#for multiple functions, in order to mimick multiprocessing, use 'get_event_loop'
+async def counter():
+    while True:
+        counter += 1
+        await asyncio.sleep(0)         # required for switching tasks in worker
+
+async def monitor():
+    while True:
+        print("done")
+
+if __name__ =="__main__":
+    loop = asyncio.get_event_loop()
+    task_one = loop.create_task(counter)
+    task_two = loop.create_task(monitor)
+    loop.run_forever()
+    #loop.run_until_complete(task_one)  # used if task one is a finite loop
+
+
+
+
+
+
+        
 
 
 
