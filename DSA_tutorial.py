@@ -73,7 +73,28 @@ names = ['Finn Binde', "abig zes", 'goat skin']
 regex = '^\w+ \w+$'
 for name in names:
     result = re.search(regex, name)  # how regex are applied
+    if result:
+        print(result) #returns boolean
+        print(name)    # returns the names that match.
+        print(result.start(), result.end()) # returns the first and last index that matched. same as using print(result.span())
+        print(result.span())  #same as above
+        print(result.group())  # returns the index of all matching substrings.
+
+        #working with groups, using parenthesis to split regex characters to define group, result.group(1) returns thr first group
+values = ['list of urls']
+regex = 'https?'
+for value in values:
+    if re.match(regex, value):
+        print(value)              #those values that start with 'http?'
+
 ^Fran # for all starting with 'Fran:
+i$  # for all words ending with 'i'
+\d  # scans a string for a single numerical data, \d\d will mean two numbers
+\s   # any sting containing a space
+\w   # matches one word, \w\w means two words
+[aeiou]{2}  # specifying regex to match to out of the characters provided, in a string.
+
+
 
 """Multiprocessing and Multithreading"""
 
@@ -343,8 +364,63 @@ users | {4: "ade", 5: "bade"}     # using '|' is a union and extends the diction
 users |= {4: "ade", 5: "bade"}
 
 
+"""Strings"""
+#capitalize
+text: str = 'string'
+print(text.capitalize())     # capital letters
 
+#casefold
+text1 = "MariO"
+text2 = 'mArIo'
+text1.casefold()
+text2.casefold()  #changes to a comparable string, maybe lowercase
+check = text1 == text2
+print(check)            # True
 
+#center
+text = 'abc'
+print(text.center(20, '.'))      #center distance and occupier  '.......abc.......
+
+#count
+print(text.count('ab'))
+#encode
+print(text.encode(encoding="UTF-8", errors='strict'))     # encoded version of text.  b'abc'
+#endswith
+print(text.endswith(('e', 'a')))   # endswith e or a, we can use one argument also
+#expandtabs()
+text = 'text\ttext2'
+print(text.expandtabs(20))   #create tab space at '\t' position
+#find()
+position= text.find('subscribe') # returns the index of where find is located from the start index
+print(text[position:])  # print everything after the found word. if not found, it returns -1
+#format()
+text = {subject} is doing: {action}
+text.format(subject= "cat" action='meow')  # print output returns 'cat is doing meow'
+#format_map()
+coordinates = {'x': 10, 'y': -5}
+text = 'coordinates: ({x}, {y})'
+print(text.format_map(coordinates))      # output will map values of x and y
+#index()
+text.index("banana")  #finds index, returns error if not found
+#isalnum()
+print(text.isalnum()) # returns boolean if only letters and numbers, returns true
+#isdecimal(): numeric
+#isalpha():  letters
+#isnumeric(): for all kinds of letters regardless of the language
+#islower(): boolean: if not lowercase, return False
+#isspace(): does string contain only space?
+print(''.join(['text1', 'text2', 'text3'])) # joins text with space in between, add '-' to change delimiter.
+#lstrip(): text.lstrip("some")  # if text = 'some day', text becomes 'day'
+#partition('-'): splits string, specify the separator
+#replace()
+text.replace("comment", 'subscribe')  # change comment to subscribe
+#rindex(): same as index, starts from the end instead
+#rsplit(sep=' '): splits into an array with separator as space
+#splitlines
+text = 'remember to \n comment'
+print(text.splitlines()) # convert a text with \n characters into an array each newline indicating a new element.
+#strip('luigi'): removing luigi from the text, text.strip('luigi)
+#title(): converts a string to a title, making the first letter of each character capitalized.
 
 #functions
 
@@ -717,8 +793,8 @@ union_set = set1.union(set2)  # others too, intersection, difference, symmetric 
 
 
 
-
-
+#NB: when given a question, ask questions to clarify requirements and analysis. also use test cases. use pseudocodes too.
+#NB: always look over every part of your code to see if you can reduce the code length.
 
 # DSA commences.
 # Built in data structures: Lists, TUple, Sets, Dictionary
@@ -999,6 +1075,261 @@ q.sort(reverse = True)   #sorts in desending order
 q.pop(0)
 q.pop(0)  
 
+"""Sliding Window"""     # method of finding subarrays. time O(n), space O(1)
+#subarray: contiguous set of values from an array. {1,2, 3, 4}   sub array{1,2}, not {1,3} because the latter in not contiguous, ordering is preserved
+#substring: is a subarray but with characters
+#subsequence: is a subarray but without the contiguity rule  {1,3} is also a subsequence ordering is preserved i.e {4, 1} isn't a subsequence
+#subset: no contiguity, no ordering
+
+#NB: if you are not given an array to work with, create your own
+
+#E.G1: Given a array of positive integers, find the subarrays of integers that add up to a given number. 
+
+def get_subarrays(input_arr, desired_sum):
+    # Validate input
+    assert desired_sum > 0, 'Desired sum must be greater than 0.'
+    
+    # Current window sum and window sum start index
+    sum_val = 0
+    sum_start_index = 0
+    solutions = []
+
+    for index, item in enumerate(input_arr):
+        sum_val += item
+
+        while sum_val > desired_sum:
+            sum_val -= input_arr[sum_start_index]
+            sum_start_index += 1
+
+        if sum_val == desired_sum:
+            solutions.append(input_arr[sum_start_index:index + 1])
+
+    return solutions
+
+
+# Tests
+# Test case #1
+example_input1 = [1, 7, 9, 4, 3, 2, 2]
+desired_sum1 = 7
+solution1 = [[7], [4, 3], [3, 2, 2]]
+
+calculated_solution1 = get_subarrays(example_input1, desired_sum1)
+
+print(f"Example Input #1: {example_input1}, Desired Sum: {desired_sum1}, Solution: {calculated_solution1}")
+assert calculated_solution1 == solution1
+
+# Test case #2
+example_input2 = [23, 1, 6, 9, 15, 8]
+desired_sum2 = 24
+solution2 = [[23, 1], [9, 15]]
+
+calculated_solution2 = get_subarrays(example_input2, desired_sum2)
+
+print(f"Example Input #2: {example_input2}, Desired Sum: {desired_sum2}, Solution: {calculated_solution2}")
+assert calculated_solution2 == solution2
+
+# Test case #3
+# Sliding window technique cannot handle negative numbers in this case, so the solution will not be complete
+example_input3 = [-1, -4, 0, 5, 3, 2, 1]
+desired_sum3 = 5
+solution3 = [[-1, -4, 0, 5, 3, 2], [5], [3, 2]]
+
+calculated_solution3 = get_subarrays(example_input3, desired_sum3)
+
+print(f"Example Input #3: {example_input3}, Desired Sum: {desired_sum3}, Solution (some missing): {calculated_solution3}")
+assert calculated_solution3 != solution3
+
+## E.G2: Given an array of 0's and 1's, find the maximum sequence of continuous 1's that can be formed by flipping at-most k 0's to 1's.
+
+def get_max_sequence(input_arr, max_flips):
+    # Validate input
+    assert max_flips >= 0, 'Max flips cannot be negative.'
+
+    sub_arr_start = 0
+    sub_arr_end = 0
+    flipped_zeroes = 0
+    longest_sub_arr = {'start': 0, 'end': 0, 'len': 0}
+
+    for index, item in enumerate(input_arr):
+        # Always start by increasing window size
+        sub_arr_end = index
+
+        if item == 0:
+            flipped_zeroes += 1
+
+        sub_arr_len = 1 + sub_arr_end - sub_arr_start
+        if flipped_zeroes <= max_flips and sub_arr_len > longest_sub_arr['len']:
+            longest_sub_arr = {'start': sub_arr_start, 'end': sub_arr_end, 'len': sub_arr_len}
+
+        # Decrease window size until we are less than or equal to the max flip limit
+        while flipped_zeroes > max_flips:
+            if input_arr[sub_arr_start] == 0:
+                flipped_zeroes -= 1
+
+            sub_arr_start += 1
+
+    return input_arr[longest_sub_arr['start']: longest_sub_arr['end'] + 1]
+
+
+# Tests
+# Test case #1
+example_input1 = [1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0]
+max_flips1 = 2
+solution1 = [0, 1, 1, 0, 1, 1]
+
+calculated_solution1 = get_max_sequence(example_input1, max_flips1)
+
+print(f"Example Input #1: {example_input1}, Maximum Flips: {max_flips1}, Solution: {calculated_solution1} (Length: {len(calculated_solution1)})")
+assert calculated_solution1 == solution1
+
+# Test case #2
+example_input2 = [0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0]
+max_flips2 = 3
+solution2 = [1, 0, 0, 0, 1, 1, 1, 1]
+
+calculated_solution2 = get_max_sequence(example_input2, max_flips2)
+
+print(f"Example Input #2: {example_input2}, Maximum Flips: {max_flips2}, Solution: {calculated_solution2} (Length: {len(calculated_solution2)})")
+assert calculated_solution2 == solution2
+
+#E.G3: Given an array of integers, find maximum sum subarray of the required size.
+
+def get_max_subarray(input_arr, subarray_size):
+    # Validate input
+    assert subarray_size > 0, 'Subarray size must be positive.'
+
+    current_sum = 0
+    max_sum = 0
+    max_sum_start_index = 0
+
+    # Iterate entire array from left to right
+    for index, number in enumerate(input_arr):
+        # Increase the window size by one from the right
+        current_sum += number
+
+        if index < subarray_size:
+            # Continue to accumulate until we reach the desired subarray size (= max window size)
+            max_sum = current_sum
+        else:
+            # We are over the max window size, so remove one element from the left
+            current_sum -= input_arr[index - subarray_size]
+
+            if current_sum > max_sum:
+                # We have a new maximum sum window, so record its starting index
+                max_sum = current_sum
+                max_sum_start_index = index - subarray_size + 1
+
+    return input_arr[max_sum_start_index:max_sum_start_index + subarray_size]
+
+
+# Tests
+# Test case #1
+example_input1 = [-1, 2, 3, 0, -3, 9]
+subarray_size1 = 2
+solution1 = [-3, 9]
+
+calculated_solution1 = get_max_subarray(example_input1, subarray_size1)
+
+print(f"Example Input #1: {example_input1}, Subarray Size: {subarray_size1}, Solution: {calculated_solution1}")
+assert calculated_solution1 == solution1
+
+# Test case #2
+example_input2 = [6, 0, -1, 2, 1, -3, 4]
+subarray_size2 = 3
+solution2 = [6, 0, -1]
+
+calculated_solution2 = get_max_subarray(example_input2, subarray_size2)
+
+print(f"Example Input #2: {example_input2}, Subarray Size: {subarray_size2}, Solution: {calculated_solution2}")
+assert calculated_solution2 == solution2
+
+
+"""Bit Manipulation"""
+# Converting base 10 to base 2: 28 = multiples of 2 are (16 + 8 + 4), yeilding 1(for 16), 1(for 8), 1(for 4), 0(for 2) and 0(for 1) == 11100.  NB: consider each power of two consecutively.
+
+# printing binary digits
+n1 = 28
+n2 = 19
+
+print(bin(n1))       #output: 0B11100
+print(bin(n2)[2:])    #output: 10011
+
+# we use bitwise operators to perform computation with binary (AND, OR, XOR)
+
+# AND    (1 and 1 is 1, otherwise 0)
+n3 = n1 & n2
+print(bin(n3)[2:])
+
+# OR     (0 or 0 is 0, otherwise 1)
+n4 = n1 | n2
+print(bin(n4)[2:])
+
+# XOR    (1 XOR 0 = 1, 0 XOR 1 = 1, otherwise 0)
+n5 = n1 ^ n2
+print("0" + bin(n5)[2:])     # we added zero because the terminal won't display leading zeros
+
+# NOT
+print(bin(~n1))      # the not symbol doesn't invert the number as it is supposed to. we do it another way
+
+print("0" + bin(0b111111111111 - n1)[2:]) #'0b' indicates we are writing a binary, "1's" should equal the length of the number to convert
+
+# SHIFTS   (equivalent to adding a zero at the end)
+
+number = 20
+print(bin(number)[2:])   # 10100
+number <<= 1       #  left shifting once '1'
+print(number)   # 40
+print(bin(number)[2:]) # 101000
+number >>= 2  # right shift two places
+print(number)   #10
+print(bin(number)[2:])  #1010
+
+# Flags  #(Read (R), Write (W), Execute, change policy)
+# giving a user permissions
+#RWEC = 0b1111, R only = 1000 ...
+
+person1 = 0b1000
+person2 = 0b1110
+person3 = 0b1111
+person4 = 0b1010
+person5 = 0b1101
+
+# all have to have a certain permission before something can be done
+together1 = person1 & person2 & person3 & person4 & person5   # 0b1000, what all of them can do.
+print(bin(together1)[2:])
+
+# one person should have all the permission at least (use the pipe operator)
+together2 = person1 | person2 | person3 | person4 | person5     # 0b1111
+
+# permissions in practice
+WRITE_PERMISSION = 0b0100
+READ_PERMISSION = 0b1000
+
+def perf(permission):
+    if permission == 0b1100:
+        print("do something")
+
+perf(WRITE_PERMISSION | READ_PERMISSION)   # how permission is used in practive
+
+# switching variables without a placeholder
+a = 10
+b = 20
+
+a ^= b    # same as  a = a ^ b
+b ^= a 
+a ^= b
+
+print(a)  #20
+print(b) #10
+
+#checking if a number is even or odd
+somenumber = 345392
+if somenumber & 1 == 0:
+    print("even")
+else: 
+    print('odd')
+
+"""Strings"""
 
 '''Linked list'''
 # list of nodes, a list contains data field and one or two links. 
@@ -2221,7 +2552,8 @@ print(path)
 
 
 
-"""HASHING"""
+"""HASHING"""   # they are also known as dictionaries
+
 #converting a data of any length to a fix length array.
 #hash requires, input data, hash function to produce the hash value.
 # the hash function can be any function. most important considerationis collistion
@@ -2232,6 +2564,55 @@ print(path)
 #Open adressing: Linear probing: if there is a collision, add 1 to the value, and recalculate, map to h1. (h0=number, h1=number +1, ...)
 #Open adressing: Quadratic probing: instead of h1 being (number + 1) the added number is powered.
 # Double hashing uses 2 hash functions, for calculating h1, we add to just 1 of the
+
+# hash values should be immutable. use tuples instead of lists. 
+
+city_map = {}
+cities = ['calgary', 'Vancouver', 'Toronto']
+city_map['Canada'] = []   # this is done because we want to pass a list as values, initialize first
+city_map["Canada"] += cities
+# working with hashmaps, they are plainly dictionaries
+# .keys(), .values() and .items()
+
+#E.g. Given an array of strings, group the anagrams together, anagrams are words containing the same letters.
+
+## Method1
+from collections import defaultdict
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        anagram_map = defaultdict(list)
+        result = []
+
+        for s in strs:
+            sorted_s = tuple(sorted(s))    # sorted returns a list, keys must be immutable
+            anagram_map[sorted_s].append(s) # we are appending to a list
+
+        for value in anagram_map.values():
+            result.append(value)
+
+        return value
+    
+#using a normal dictionary
+from typing import List
+
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        anagram = {}
+        result = []
+
+        for s in strs:
+            sorted_s = tuple(sorted(s))
+            if sorted_s in anagram:
+                anagram[sorted_s].append(s)
+            else:
+                anagram[sorted_s] = [s]
+
+        for a in anagram.values():
+            result.append(a)
+
+        return result
+
+
 
 
 '''Big Notation time complexity'''
