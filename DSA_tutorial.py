@@ -245,12 +245,7 @@ if __name__ =="__main__":
     #loop.run_until_complete(task_one)  # used if task one is a finite loop
 
 
-
-
-
-
         
-
 
 
 groceries = [] # this evaluates to false when there isn't any value within
@@ -278,7 +273,7 @@ except(ZeroDivisionError, TypeError):
 
 #finding the methods available to an object. List, tuple, dictionary etc
 for method in dir(tuple()): # this could be any other object.
-    if method.startswith('__'):         # printing all the methods associated with the class object.
+    if not method.startswith('__'):         # printing all the methods associated with the class object.
         print(method)
 
 
@@ -313,6 +308,14 @@ shopping.sort(key=lambda name: name.lower(), reverse= True)    # using the lambd
 
 
 # Dictionaries
+a = dict(a='dave', b="mary")
+my_dict = {}
+my_dict['key'] = 'value'       # how to add values
+
+keys = ['key1', 'key2', 'key3']
+values = ['value1', 'value2', 'value3']
+my_dict = {k: v for k, v in zip(keys, values)}   #inserting a list of keys and values
+
 contact = {}
 contact['height'] # height is meant to be the key
 print(contact['height']) # should print the value associated with this key
@@ -667,6 +670,53 @@ def good_wine(value):
   return False
 
 df['good'] = df['rating'].apply(good_wine) # Adds a new column called good, if ratings is greater than 94, it appends true.
+
+"""Tuples"""   #they are faster than lists, immutable and cannot be added to or deleted from
+
+tuple1 = (1, 2, 3)
+tuple2 = (4, 5, 6)
+new_tuple = tuple1 + tuple2
+
+tuple1 = (1, 2, 3)
+repeated_tuple = tuple1 * 3    # performing operations
+
+my_tuple = (1, 2, 3, 4, 5)   
+element = my_tuple[0]
+subset = my_tuple[1:4]   #indexing
+
+my_tuple = (1, 2, 2, 3, 4, 2)
+count_of_2 = my_tuple.count(2)     # counting values
+
+my_tuple = (1, 2, 3, 4, 5)
+new_tuple = tuple(element for element in my_tuple if element != 3)   #creating a new tuple without some elements: alternative to deleting.
+
+"""sets"""    # unordered and mutable, no duplicate values
+
+my_set = {1, 2, 3}
+my_set.add(4)          #adding elements
+
+my_set = {1, 2, 3}
+my_set.update([4, 5, 6])  #adding multiple elements
+
+my_set = {1, 2, 3}
+my_set.remove(2)          # deleting by value. Raises key error if not found
+
+my_set = {1, 2, 3}
+my_set.discard(2)         # deleting by value, raises no error if not found
+
+my_set = {1, 2, 3}
+popped_element = my_set.pop()    # returns an abitrary element and removes it
+
+my_set = {1, 2, 3}
+my_set.clear()            # empties set
+
+set1 = {1, 2, 3}
+set2 = {3, 4, 5}
+union_set = set1.union(set2)  # others too, intersection, difference, symmetric difference.
+
+
+
+
 
 
 
